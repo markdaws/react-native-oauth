@@ -87,10 +87,14 @@ RCT_EXPORT_MODULE(OAuthManager);
     
     [authPlatform setURLOpener: ^void(NSURL *URL, DCTAuthPlatformCompletion completion) {
         // [sharedManager setPendingAuthentication:YES];
+        // We have to use this forked library until this is fixed.
+        // https://github.com/fullstackreact/react-native-oauth/pull/150/files
         if ([SFSafariViewController class] != nil) {
-            safariViewController = [[SFSafariViewController alloc] initWithURL:URL];
-            UIViewController *viewController = application.keyWindow.rootViewController;
-            [viewController presentViewController:safariViewController animated:YES completion: nil];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                safariViewController = [[SFSafariViewController alloc] initWithURL:URL];
+                UIViewController *viewController = application.keyWindow.rootViewController;
+                [viewController presentViewController:safariViewController animated:YES completion: nil];
+            });
         } else {
             [application openURL:URL];
         }
